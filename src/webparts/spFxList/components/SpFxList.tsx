@@ -4,8 +4,6 @@ import type { ISpFxListProps } from './ISpFxListProps';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { 
   FluentProvider,
-  List, 
-  ListItem, 
   Spinner,
   webLightTheme
 } from '@fluentui/react-components';
@@ -296,11 +294,11 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
 
   private _renderTableHeader = (): React.ReactNode => {
     const columns = [
-      { key: 'Title', label: 'Title' },
-      { key: 'Modified', label: 'Modified' },
-      { key: 'Created', label: 'Created' },
-      { key: 'Author', label: 'Author' },
-      { key: 'Editor', label: 'Editor' }
+      { key: 'Title' as SortColumn, label: 'Title' },
+      { key: 'Modified' as SortColumn, label: 'Modified' },
+      { key: 'Created' as SortColumn, label: 'Created' },
+      { key: 'Author' as SortColumn, label: 'Author' },
+      { key: 'Editor' as SortColumn, label: 'Editor' }
     ] as Array<{ key: SortColumn; label: string }>;
 
     return (
@@ -312,8 +310,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
         }}>
           {columns.map(col => (
             <th
-              key={col.key}
-              onClick={() => this._handleSort(col.key)}
+              key={col.key || ''}
+              onClick={() => col.key && this._handleSort(col.key)}
               style={{
                 padding: '12px 16px',
                 textAlign: 'left',
@@ -355,6 +353,97 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
       >
         <td style={{ padding: '12px 16px', borderRight: '1px solid #e1dfdd' }}>
           {displayName}
+        </td>
+        <td style={{ padding: '12px 16px', borderRight: '1px solid #e1dfdd' }}>
+          {modified}
+        </td>
+        <td style={{ padding: '12px 16px', borderRight: '1px solid #e1dfdd' }}>
+          {created}
+        </td>
+        <td style={{ padding: '12px 16px', borderRight: '1px solid #e1dfdd' }}>
+          {author}
+        </td>
+        <td style={{ padding: '12px 16px' }}>
+          {editor}
+        </td>
+      </tr>
+    );
+  }
+
+  private _renderDocumentLibraryTableRow = (item: IListItem, index: number): React.ReactNode => {
+    const displayName = item.Title || item.FileLeafRef || `Item ${item.Id}`;
+    const modified = item.Modified ? new Date(item.Modified).toLocaleDateString() : '';
+    const created = item.Created ? new Date(item.Created).toLocaleDateString() : '';
+    const author = item.Author?.Title || '';
+    const editor = item.Editor?.Title || '';
+    const isFolder = this._isFolder(item);
+
+    return (
+      <tr 
+        key={`${item.Id}-${index}`}
+        style={{
+          borderBottom: '1px solid #e1dfdd',
+          transition: 'background-color 0.1s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#faf9f8';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
+        <td style={{ padding: '12px 16px', borderRight: '1px solid #e1dfdd' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {isFolder ? (
+              <>
+                <Folder16Regular style={{ color: '#0078d4', flexShrink: 0 }} />
+                <span
+                  onClick={() => this._navigateToFolder(displayName)}
+                  style={{
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    color: '#0078d4'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textDecoration = 'underline';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textDecoration = 'none';
+                  }}
+                >
+                  {displayName}
+                </span>
+              </>
+            ) : (
+              <>
+                <Document16Regular style={{ color: '#666', flexShrink: 0 }} />
+                <a
+                  href={this._getDocumentUrl(item)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  style={{
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    color: '#0078d4',
+                    textDecoration: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textDecoration = 'underline';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textDecoration = 'none';
+                  }}
+                >
+                  {displayName}
+                </a>
+              </>
+            )}
+          </div>
         </td>
         <td style={{ padding: '12px 16px', borderRight: '1px solid #e1dfdd' }}>
           {modified}
@@ -511,82 +600,6 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     return `${this.props.webUrl}/_layouts/15/WopiFrame.aspx?sourcedoc=${encodeURIComponent(fileName)}`;
   }
 
-  private _renderItemContent = (item: IListItem): React.ReactNode => {
-    const displayName = item.Title || item.FileLeafRef || `Item ${item.Id}`;
-    const modified = item.Modified ? new Date(item.Modified).toLocaleDateString() : '';
-    const author = item.Author?.Title || '';
-    const isFolder = this._isFolder(item);
-    
-    return (
-      <div 
-        style={{ 
-          padding: '8px 0',
-          cursor: isFolder ? 'pointer' : 'default'
-        }}
-        onClick={() => {
-          if (isFolder) {
-            this._navigateToFolder(displayName);
-          }
-        }}
-        onMouseEnter={(e) => {
-          if (isFolder) {
-            e.currentTarget.style.backgroundColor = '#faf9f8';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isFolder) {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          {isFolder ? (
-            <Folder16Regular style={{ color: '#0078d4', flexShrink: 0 }} />
-          ) : (
-            <Document16Regular style={{ color: '#666', flexShrink: 0 }} />
-          )}
-          {isFolder ? (
-            <div style={{ fontWeight: '600', fontSize: '14px', flex: 1 }}>
-              {displayName}
-            </div>
-          ) : (
-            <a
-              href={this._getDocumentUrl(item)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                // Prevent event bubbling to parent div
-                e.stopPropagation();
-              }}
-              style={{
-                fontWeight: '600',
-                fontSize: '14px',
-                flex: 1,
-                color: '#0078d4',
-                textDecoration: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.textDecoration = 'underline';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.textDecoration = 'none';
-              }}
-            >
-              {displayName}
-            </a>
-          )}
-        </div>
-        {(modified || author) && (
-          <div style={{ fontSize: '12px', color: '#666', marginLeft: '24px' }}>
-            {modified && <span style={{ marginRight: '12px' }}>Modified: {modified}</span>}
-            {author && <span>By: {author}</span>}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   public render(): React.ReactElement<ISpFxListProps> {
     const { items, loading, error, listTitle } = this.state;
     console.log('SpFxList render - items:', items.length, 'loading:', loading, 'error:', error);
@@ -640,17 +653,14 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
                 : 'No items found in this list.'}
             </div>
           ) : isDocumentLibrary ? (
-            // Document Library - render with folder navigation
+            // Document Library - render as table with sortable columns
             <div style={{ border: '1px solid #e1dfdd', borderRadius: '4px', overflow: 'hidden' }}>
-              {/* @ts-expect-error - Fluent UI v9 List typing issue with React 17 */}
-              <List>
-                {items.map((item, index) => (
-                  // @ts-expect-error - Fluent UI v9 ListItem typing issue with React 17
-                  <ListItem key={`${item.Id}-${index}`}>
-                    {this._renderItemContent(item)}
-                  </ListItem>
-                ))}
-              </List>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                {this._renderTableHeader()}
+                <tbody>
+                  {sortedItems.map((item, index) => this._renderDocumentLibraryTableRow(item, index))}
+                </tbody>
+              </table>
             </div>
           ) : (
             // Regular List - render as table with sortable columns
