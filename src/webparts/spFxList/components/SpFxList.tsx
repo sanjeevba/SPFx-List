@@ -4,15 +4,8 @@ import type { ISpFxListProps } from './ISpFxListProps';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { 
   FluentProvider,
-  List, 
-  ListItem, 
   Spinner,
-  webLightTheme,
-  DataGrid,
-  DataGridHeader,
-  DataGridBody,
-  DataGridRow,
-  DataGridCell
+  webLightTheme
 } from '@fluentui/react-components';
 import { ArrowUp16Regular, ArrowDown16Regular, Folder16Regular, Document16Regular, ChevronRight16Regular } from '@fluentui/react-icons';
 
@@ -367,104 +360,85 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     document.addEventListener('mouseup', handleMouseUp);
   }
 
-  private _getColumnDefinitions = () => {
-    const { columnWidths } = this.state;
-    return [
-      { columnId: 'Title', width: columnWidths['Title'] || 300, minWidth: 100 },
-      { columnId: 'Modified', width: columnWidths['Modified'] || 150, minWidth: 100 },
-      { columnId: 'Created', width: columnWidths['Created'] || 150, minWidth: 100 },
-      { columnId: 'Author', width: columnWidths['Author'] || 200, minWidth: 100 },
-      { columnId: 'Editor', width: columnWidths['Editor'] || 200, minWidth: 100 }
-    ];
-  }
-
-  private _renderDataGridHeader = (): React.ReactNode => {
+  private _renderTableHeader = (): React.ReactNode => {
     const { columnWidths, resizingColumn } = this.state;
     const columns = [
-      { key: 'Title', label: 'Title' },
-      { key: 'Modified', label: 'Modified' },
-      { key: 'Created', label: 'Created' },
-      { key: 'Author', label: 'Author' },
-      { key: 'Editor', label: 'Editor' }
+      { key: 'Title' as SortColumn, label: 'Title' },
+      { key: 'Modified' as SortColumn, label: 'Modified' },
+      { key: 'Created' as SortColumn, label: 'Created' },
+      { key: 'Author' as SortColumn, label: 'Author' },
+      { key: 'Editor' as SortColumn, label: 'Editor' }
     ] as Array<{ key: SortColumn; label: string }>;
 
     return (
-<<<<<<< HEAD
-      // @ts-expect-error - Fluent UI v9 DataGridHeader typing issue with React 17
-      <DataGridHeader>
-        {columns.map((col, index) => {
-          const columnKey = col.key || '';
-          const width = col.key ? (columnWidths[col.key] || 200) : 200;
-          return (
-            // @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17
-            <DataGridCell
-              // @ts-expect-error - Fluent UI v9 DataGridCell key prop typing issue with React 17
-              key={columnKey}
-              // @ts-expect-error - Fluent UI v9 DataGridCell style prop typing issue with React 17
-=======
       <thead>
         <tr style={{ 
           backgroundColor: '#f3f2f1', 
-          borderBottom: '2px solid #e1dfdd',
-          cursor: 'pointer'
+          borderBottom: '2px solid #e1dfdd'
         }}>
-          {columns.map(col => (
-            <th
-              key={col.key}
-              onClick={() => this._handleSort(col.key)}
->>>>>>> parent of 148480a (Switched to HTML based list)
-              style={{
-                width: `${width}px`,
-                minWidth: '100px',
-                position: 'relative',
-                padding: '12px 16px',
-                textAlign: 'left',
-                fontWeight: '600',
-                fontSize: '14px',
-                userSelect: 'none',
-                cursor: resizingColumn === columnKey ? 'col-resize' : 'pointer',
-                backgroundColor: '#f3f2f1',
-                borderRight: index < columns.length - 1 ? '1px solid #e1dfdd' : 'none'
-              }}
-              // @ts-expect-error - Fluent UI v9 DataGridCell onClick prop typing issue with React 17
-              onClick={() => col.key && this._handleSort(col.key)}
-            >
-              {col.label}
-              {this._renderSortIcon(col.key)}
-              {index < columns.length - 1 && (
+          {columns.map((col, index) => {
+            const columnKey = col.key || '';
+            const width = col.key ? (columnWidths[col.key] || 200) : 200;
+            return (
+              <th
+                key={columnKey}
+                style={{
+                  width: `${width}px`,
+                  minWidth: '100px',
+                  position: 'relative',
+                  padding: 0,
+                  borderRight: index < columns.length - 1 ? '1px solid #e1dfdd' : 'none'
+                }}
+              >
                 <div
-                  onMouseDown={(e) => this._handleResizeStart(columnKey, e)}
+                  onClick={() => col.key && this._handleSort(col.key)}
                   style={{
-                    position: 'absolute',
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: '8px',
-                    cursor: 'col-resize',
-                    backgroundColor: resizingColumn === columnKey ? '#0078d4' : 'transparent',
-                    zIndex: 1,
-                    userSelect: 'none'
+                    padding: '12px 16px',
+                    textAlign: 'left',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    userSelect: 'none',
+                    cursor: resizingColumn === columnKey ? 'col-resize' : 'pointer'
                   }}
-                  onMouseEnter={(e) => {
-                    if (resizingColumn !== columnKey) {
-                      e.currentTarget.style.backgroundColor = '#c8c6c4';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (resizingColumn !== columnKey) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                />
-              )}
-            </DataGridCell>
-          );
-        })}
-      </DataGridHeader>
+                >
+                  {col.label}
+                  {this._renderSortIcon(col.key)}
+                </div>
+                {index < columns.length - 1 && (
+                  <div
+                    onMouseDown={(e) => this._handleResizeStart(columnKey, e)}
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: '8px',
+                      cursor: 'col-resize',
+                      backgroundColor: resizingColumn === columnKey ? '#0078d4' : 'transparent',
+                      zIndex: 1,
+                      userSelect: 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (resizingColumn !== columnKey) {
+                        e.currentTarget.style.backgroundColor = '#c8c6c4';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (resizingColumn !== columnKey) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  />
+                )}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
     );
   }
 
-  private _renderDataGridRow = (item: IListItem): React.ReactNode => {
+  private _renderTableRow = (item: IListItem): React.ReactNode => {
     const { columnWidths } = this.state;
     const displayName = item.Title || item.FileLeafRef || `Item ${item.Id}`;
     const modified = item.Modified ? new Date(item.Modified).toLocaleDateString() : '';
@@ -473,22 +447,20 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     const editor = item.Editor?.Title || '';
 
     return (
-      // @ts-expect-error - Fluent UI v9 DataGridRow typing issue with React 17
-      <DataGridRow 
+      <tr 
         key={item.Id}
         style={{
           borderBottom: '1px solid #e1dfdd',
           transition: 'background-color 0.1s'
         }}
-        onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+        onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#faf9f8';
         }}
-        onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+        onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';
         }}
       >
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        <td style={{ 
           width: `${columnWidths['Title'] || 300}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -498,9 +470,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {displayName}
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Modified'] || 150}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -510,9 +481,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {modified}
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Created'] || 150}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -522,9 +492,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {created}
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Author'] || 200}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -534,9 +503,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {author}
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Editor'] || 200}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -545,13 +513,12 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {editor}
-        </DataGridCell>
-      </DataGridRow>
+        </td>
+      </tr>
     );
   }
 
-<<<<<<< HEAD
-  private _renderDocumentLibraryDataGridRow = (item: IListItem, index: number): React.ReactNode => {
+  private _renderDocumentLibraryTableRow = (item: IListItem, index: number): React.ReactNode => {
     const { columnWidths } = this.state;
     const displayName = item.Title || item.FileLeafRef || `Item ${item.Id}`;
     const modified = item.Modified ? new Date(item.Modified).toLocaleDateString() : '';
@@ -561,22 +528,20 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     const isFolder = this._isFolder(item);
 
     return (
-      // @ts-expect-error - Fluent UI v9 DataGridRow typing issue with React 17
-      <DataGridRow 
+      <tr 
         key={`${item.Id}-${index}`}
         style={{
           borderBottom: '1px solid #e1dfdd',
           transition: 'background-color 0.1s'
         }}
-        onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+        onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#faf9f8';
         }}
-        onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+        onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';
         }}
       >
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        <td style={{ 
           width: `${columnWidths['Title'] || 300}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -642,9 +607,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
               </>
             )}
           </div>
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Modified'] || 150}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -654,9 +618,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {modified}
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Created'] || 150}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -666,9 +629,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {created}
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Author'] || 200}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -678,9 +640,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {author}
-        </DataGridCell>
-        {/* @ts-expect-error - Fluent UI v9 DataGridCell typing issue with React 17 */}
-        <DataGridCell style={{ 
+        </td>
+        <td style={{ 
           width: `${columnWidths['Editor'] || 200}px`,
           minWidth: '100px',
           padding: '12px 16px',
@@ -689,13 +650,11 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
           whiteSpace: 'nowrap'
         }}>
           {editor}
-        </DataGridCell>
-      </DataGridRow>
+        </td>
+      </tr>
     );
   }
 
-=======
->>>>>>> parent of 148480a (Switched to HTML based list)
   private _navigateToFolder = (folderName: string): void => {
     const { currentFolderPath, folderPathHistory } = this.state;
     const newPath = currentFolderPath 
@@ -835,82 +794,6 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     return `${this.props.webUrl}/_layouts/15/WopiFrame.aspx?sourcedoc=${encodeURIComponent(fileName)}`;
   }
 
-  private _renderItemContent = (item: IListItem): React.ReactNode => {
-    const displayName = item.Title || item.FileLeafRef || `Item ${item.Id}`;
-    const modified = item.Modified ? new Date(item.Modified).toLocaleDateString() : '';
-    const author = item.Author?.Title || '';
-    const isFolder = this._isFolder(item);
-    
-    return (
-      <div 
-        style={{ 
-          padding: '8px 0',
-          cursor: isFolder ? 'pointer' : 'default'
-        }}
-        onClick={() => {
-          if (isFolder) {
-            this._navigateToFolder(displayName);
-          }
-        }}
-        onMouseEnter={(e) => {
-          if (isFolder) {
-            e.currentTarget.style.backgroundColor = '#faf9f8';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isFolder) {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          {isFolder ? (
-            <Folder16Regular style={{ color: '#0078d4', flexShrink: 0 }} />
-          ) : (
-            <Document16Regular style={{ color: '#666', flexShrink: 0 }} />
-          )}
-          {isFolder ? (
-            <div style={{ fontWeight: '600', fontSize: '14px', flex: 1 }}>
-              {displayName}
-            </div>
-          ) : (
-            <a
-              href={this._getDocumentUrl(item)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                // Prevent event bubbling to parent div
-                e.stopPropagation();
-              }}
-              style={{
-                fontWeight: '600',
-                fontSize: '14px',
-                flex: 1,
-                color: '#0078d4',
-                textDecoration: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.textDecoration = 'underline';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.textDecoration = 'none';
-              }}
-            >
-              {displayName}
-            </a>
-          )}
-        </div>
-        {(modified || author) && (
-          <div style={{ fontSize: '12px', color: '#666', marginLeft: '24px' }}>
-            {modified && <span style={{ marginRight: '12px' }}>Modified: {modified}</span>}
-            {author && <span>By: {author}</span>}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   public render(): React.ReactElement<ISpFxListProps> {
     const { items, loading, error, listTitle } = this.state;
     console.log('SpFxList render - items:', items?.length || 0, 'loading:', loading, 'error:', error);
@@ -971,58 +854,24 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
                 : 'No items found in this list.'}
             </div>
           ) : isDocumentLibrary ? (
-<<<<<<< HEAD
-            // Document Library - render with Fluent UI v9 DataGrid with sortable and resizable columns
-            <div style={{ border: '1px solid #e1dfdd', borderRadius: '4px', overflow: 'hidden', minHeight: '200px' }}>
-              <div style={{ padding: '8px', backgroundColor: '#faf9f8', borderBottom: '1px solid #e1dfdd' }}>
-                <strong>Document Library Items ({sortedItemsArray.length})</strong>
-              </div>
-              {/* @ts-expect-error - Fluent UI v9 DataGrid typing issue with React 17 */}
-              <DataGrid 
-                // @ts-expect-error - Fluent UI v9 DataGrid items prop typing issue with React 17
-                items={sortedItemsArray}
-                // @ts-expect-error - Fluent UI v9 DataGrid columns prop typing issue with React 17
-                columns={this._getColumnDefinitions()}
-              >
-                {this._renderDataGridHeader()}
-                {/* @ts-ignore - Fluent UI v9 DataGridBody typing issue with React 17 - expects RowRenderFunction but we're using array of rows */}
-                <DataGridBody {...({} as any)}>
-                  {sortedItemsArray.length > 0 ? sortedItemsArray.map((item, index) => this._renderDocumentLibraryDataGridRow(item, index)) : <div style={{ padding: '16px' }}>No items to display</div>}
-                </DataGridBody>
-              </DataGrid>
-=======
-            // Document Library - render with folder navigation
+            // Document Library - render with HTML table with sortable and resizable columns
             <div style={{ border: '1px solid #e1dfdd', borderRadius: '4px', overflow: 'hidden' }}>
-              {/* @ts-expect-error - Fluent UI v9 List typing issue with React 17 */}
-              <List>
-                {items.map((item, index) => (
-                  // @ts-expect-error - Fluent UI v9 ListItem typing issue with React 17
-                  <ListItem key={`${item.Id}-${index}`}>
-                    {this._renderItemContent(item)}
-                  </ListItem>
-                ))}
-              </List>
->>>>>>> parent of 148480a (Switched to HTML based list)
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                {this._renderTableHeader()}
+                <tbody>
+                  {sortedItemsArray.map((item, index) => this._renderDocumentLibraryTableRow(item, index))}
+                </tbody>
+              </table>
             </div>
           ) : (
-            // Regular List - render with Fluent UI v9 DataGrid with sortable and resizable columns
-            <div style={{ border: '1px solid #e1dfdd', borderRadius: '4px', overflow: 'hidden', minHeight: '200px' }}>
-              <div style={{ padding: '8px', backgroundColor: '#faf9f8', borderBottom: '1px solid #e1dfdd' }}>
-                <strong>List Items ({sortedItemsArray.length})</strong>
-              </div>
-              {/* @ts-expect-error - Fluent UI v9 DataGrid typing issue with React 17 */}
-              <DataGrid 
-                // @ts-expect-error - Fluent UI v9 DataGrid items prop typing issue with React 17
-                items={sortedItemsArray}
-                // @ts-expect-error - Fluent UI v9 DataGrid columns prop typing issue with React 17
-                columns={this._getColumnDefinitions()}
-              >
-                {this._renderDataGridHeader()}
-                {/* @ts-ignore - Fluent UI v9 DataGridBody typing issue with React 17 - expects RowRenderFunction but we're using array of rows */}
-                <DataGridBody {...({} as any)}>
-                  {sortedItemsArray.length > 0 ? sortedItemsArray.map((item) => this._renderDataGridRow(item)) : <div style={{ padding: '16px' }}>No items to display</div>}
-                </DataGridBody>
-              </DataGrid>
+            // Regular List - render with HTML table with sortable and resizable columns
+            <div style={{ border: '1px solid #e1dfdd', borderRadius: '4px', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                {this._renderTableHeader()}
+                <tbody>
+                  {sortedItemsArray.map((item) => this._renderTableRow(item))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
