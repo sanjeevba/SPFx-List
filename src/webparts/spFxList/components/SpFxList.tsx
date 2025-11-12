@@ -4,6 +4,8 @@ import type { ISpFxListProps } from './ISpFxListProps';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { 
   FluentProvider,
+  List, 
+  ListItem, 
   Spinner,
   webLightTheme,
   DataGrid,
@@ -379,14 +381,15 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
   private _renderDataGridHeader = (): React.ReactNode => {
     const { columnWidths, resizingColumn } = this.state;
     const columns = [
-      { key: 'Title' as SortColumn, label: 'Title' },
-      { key: 'Modified' as SortColumn, label: 'Modified' },
-      { key: 'Created' as SortColumn, label: 'Created' },
-      { key: 'Author' as SortColumn, label: 'Author' },
-      { key: 'Editor' as SortColumn, label: 'Editor' }
+      { key: 'Title', label: 'Title' },
+      { key: 'Modified', label: 'Modified' },
+      { key: 'Created', label: 'Created' },
+      { key: 'Author', label: 'Author' },
+      { key: 'Editor', label: 'Editor' }
     ] as Array<{ key: SortColumn; label: string }>;
 
     return (
+<<<<<<< HEAD
       // @ts-expect-error - Fluent UI v9 DataGridHeader typing issue with React 17
       <DataGridHeader>
         {columns.map((col, index) => {
@@ -398,6 +401,18 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
               // @ts-expect-error - Fluent UI v9 DataGridCell key prop typing issue with React 17
               key={columnKey}
               // @ts-expect-error - Fluent UI v9 DataGridCell style prop typing issue with React 17
+=======
+      <thead>
+        <tr style={{ 
+          backgroundColor: '#f3f2f1', 
+          borderBottom: '2px solid #e1dfdd',
+          cursor: 'pointer'
+        }}>
+          {columns.map(col => (
+            <th
+              key={col.key}
+              onClick={() => this._handleSort(col.key)}
+>>>>>>> parent of 148480a (Switched to HTML based list)
               style={{
                 width: `${width}px`,
                 minWidth: '100px',
@@ -535,6 +550,7 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     );
   }
 
+<<<<<<< HEAD
   private _renderDocumentLibraryDataGridRow = (item: IListItem, index: number): React.ReactNode => {
     const { columnWidths } = this.state;
     const displayName = item.Title || item.FileLeafRef || `Item ${item.Id}`;
@@ -678,6 +694,8 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     );
   }
 
+=======
+>>>>>>> parent of 148480a (Switched to HTML based list)
   private _navigateToFolder = (folderName: string): void => {
     const { currentFolderPath, folderPathHistory } = this.state;
     const newPath = currentFolderPath 
@@ -817,6 +835,82 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
     return `${this.props.webUrl}/_layouts/15/WopiFrame.aspx?sourcedoc=${encodeURIComponent(fileName)}`;
   }
 
+  private _renderItemContent = (item: IListItem): React.ReactNode => {
+    const displayName = item.Title || item.FileLeafRef || `Item ${item.Id}`;
+    const modified = item.Modified ? new Date(item.Modified).toLocaleDateString() : '';
+    const author = item.Author?.Title || '';
+    const isFolder = this._isFolder(item);
+    
+    return (
+      <div 
+        style={{ 
+          padding: '8px 0',
+          cursor: isFolder ? 'pointer' : 'default'
+        }}
+        onClick={() => {
+          if (isFolder) {
+            this._navigateToFolder(displayName);
+          }
+        }}
+        onMouseEnter={(e) => {
+          if (isFolder) {
+            e.currentTarget.style.backgroundColor = '#faf9f8';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (isFolder) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          {isFolder ? (
+            <Folder16Regular style={{ color: '#0078d4', flexShrink: 0 }} />
+          ) : (
+            <Document16Regular style={{ color: '#666', flexShrink: 0 }} />
+          )}
+          {isFolder ? (
+            <div style={{ fontWeight: '600', fontSize: '14px', flex: 1 }}>
+              {displayName}
+            </div>
+          ) : (
+            <a
+              href={this._getDocumentUrl(item)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                // Prevent event bubbling to parent div
+                e.stopPropagation();
+              }}
+              style={{
+                fontWeight: '600',
+                fontSize: '14px',
+                flex: 1,
+                color: '#0078d4',
+                textDecoration: 'none',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.textDecoration = 'underline';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.textDecoration = 'none';
+              }}
+            >
+              {displayName}
+            </a>
+          )}
+        </div>
+        {(modified || author) && (
+          <div style={{ fontSize: '12px', color: '#666', marginLeft: '24px' }}>
+            {modified && <span style={{ marginRight: '12px' }}>Modified: {modified}</span>}
+            {author && <span>By: {author}</span>}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   public render(): React.ReactElement<ISpFxListProps> {
     const { items, loading, error, listTitle } = this.state;
     console.log('SpFxList render - items:', items?.length || 0, 'loading:', loading, 'error:', error);
@@ -877,6 +971,7 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
                 : 'No items found in this list.'}
             </div>
           ) : isDocumentLibrary ? (
+<<<<<<< HEAD
             // Document Library - render with Fluent UI v9 DataGrid with sortable and resizable columns
             <div style={{ border: '1px solid #e1dfdd', borderRadius: '4px', overflow: 'hidden', minHeight: '200px' }}>
               <div style={{ padding: '8px', backgroundColor: '#faf9f8', borderBottom: '1px solid #e1dfdd' }}>
@@ -895,6 +990,19 @@ export default class SpFxList extends React.Component<ISpFxListProps, ISpFxListS
                   {sortedItemsArray.length > 0 ? sortedItemsArray.map((item, index) => this._renderDocumentLibraryDataGridRow(item, index)) : <div style={{ padding: '16px' }}>No items to display</div>}
                 </DataGridBody>
               </DataGrid>
+=======
+            // Document Library - render with folder navigation
+            <div style={{ border: '1px solid #e1dfdd', borderRadius: '4px', overflow: 'hidden' }}>
+              {/* @ts-expect-error - Fluent UI v9 List typing issue with React 17 */}
+              <List>
+                {items.map((item, index) => (
+                  // @ts-expect-error - Fluent UI v9 ListItem typing issue with React 17
+                  <ListItem key={`${item.Id}-${index}`}>
+                    {this._renderItemContent(item)}
+                  </ListItem>
+                ))}
+              </List>
+>>>>>>> parent of 148480a (Switched to HTML based list)
             </div>
           ) : (
             // Regular List - render with Fluent UI v9 DataGrid with sortable and resizable columns
